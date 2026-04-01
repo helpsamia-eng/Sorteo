@@ -66,6 +66,8 @@ export default function App() {
   
   const [username, setUsername] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
+  const [hasClickedLink, setHasClickedLink] = useState(false);
+  const [isVerifyingLink, setIsVerifyingLink] = useState(false);
   const [hasJoinedChannel, setHasJoinedChannel] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   
@@ -160,7 +162,7 @@ export default function App() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username.trim() || !hasJoinedChannel) return;
+    if (!username.trim() || !hasJoinedChannel || !hasClickedLink) return;
     
     setIsRegistering(true);
     setMessage(null);
@@ -184,6 +186,7 @@ export default function App() {
       setMessage({ type: 'success', text: '¡Inscripción exitosa! Mucha suerte.' });
       setUsername('');
       setHasJoinedChannel(false);
+      setHasClickedLink(false);
     } catch (error) {
       console.error("Registration error:", error);
       setMessage({ type: 'error', text: 'Error al registrar. Inténtalo de nuevo.' });
@@ -333,26 +336,59 @@ export default function App() {
               />
             </div>
 
-            <div className="flex items-center gap-3 p-4 rounded-lg bg-white/5 border border-white/10 hover:border-neon-blue/50 transition-colors cursor-pointer group" onClick={() => setHasJoinedChannel(!hasJoinedChannel)}>
-              <div className={`w-6 h-6 rounded flex items-center justify-center border-2 transition-all ${hasJoinedChannel ? 'bg-neon-blue border-neon-blue' : 'border-gray-600 group-hover:border-neon-blue'}`}>
+            <div 
+              className={`flex items-center gap-3 p-4 rounded-lg bg-white/5 border transition-all ${
+                !hasClickedLink ? 'opacity-50 cursor-not-allowed border-white/10' : 
+                hasJoinedChannel ? 'border-neon-blue bg-neon-blue/5' : 'border-white/10 hover:border-neon-blue/50 cursor-pointer group'
+              }`} 
+              onClick={() => {
+                if (!hasClickedLink) {
+                  setMessage({ type: 'error', text: 'Primero debes abrir el canal de WhatsApp y esperar la verificación.' });
+                  return;
+                }
+                setHasJoinedChannel(!hasJoinedChannel);
+              }}
+            >
+              <div className={`w-6 h-6 rounded flex items-center justify-center border-2 transition-all ${
+                hasJoinedChannel ? 'bg-neon-blue border-neon-blue' : 
+                !hasClickedLink ? 'border-gray-700' : 'border-gray-600 group-hover:border-neon-blue'
+              }`}>
                 {hasJoinedChannel && <CheckCircle2 className="w-4 h-4 text-white" />}
               </div>
-              <span className="text-sm text-gray-300 font-medium select-none">Me he unido al canal de WhatsApp (Obligatorio)</span>
+              <div className="flex flex-col">
+                <span className={`text-sm font-medium select-none ${hasJoinedChannel ? 'text-white' : 'text-gray-400'}`}>
+                  He seguido el canal de WhatsApp
+                </span>
+                {!hasClickedLink && (
+                  <span className="text-[10px] text-neon-red font-bold uppercase">
+                    {isVerifyingLink ? 'Verificando en 3s...' : 'Primero abre el canal abajo ↓'}
+                  </span>
+                )}
+                {hasClickedLink && !hasJoinedChannel && (
+                  <span className="text-[10px] text-neon-blue font-bold uppercase">¡Verificado! Marca la casilla</span>
+                )}
+              </div>
             </div>
             
             <button 
               type="submit"
-              disabled={isRegistering || !hasJoinedChannel}
-              className="w-full p-4 rounded-lg neon-button-red font-black text-xl uppercase tracking-widest flex items-center justify-center gap-2 disabled:opacity-30 disabled:cursor-not-allowed disabled:transform-none"
+              disabled={isRegistering || !hasJoinedChannel || !hasClickedLink}
+              className="w-full p-4 rounded-lg neon-button-red font-black text-xl uppercase tracking-widest flex items-center justify-center gap-2 disabled:opacity-10 disabled:grayscale disabled:cursor-not-allowed disabled:transform-none"
             >
               {isRegistering ? (
                 <RefreshCw className="w-6 h-6 animate-spin" />
+              ) : !hasClickedLink ? (
+                <>Bloqueado <Shield className="w-6 h-6" /></>
+              ) : !hasJoinedChannel ? (
+                <>Confirma Canal <AlertCircle className="w-6 h-6" /></>
               ) : (
                 <>Participar <Sword className="w-6 h-6" /></>
               )}
             </button>
             {!hasJoinedChannel && (
-              <p className="text-[10px] text-center text-neon-blue animate-pulse font-bold uppercase tracking-widest">Debes unirte al canal para participar</p>
+              <p className="text-[10px] text-center text-neon-blue animate-pulse font-bold uppercase tracking-widest">
+                {isVerifyingLink ? 'Verificando canal...' : hasClickedLink ? 'Marca la casilla para confirmar' : 'Debes unirte al canal para participar'}
+              </p>
             )}
           </form>
 
@@ -370,7 +406,12 @@ export default function App() {
           )}
 
           <div className="space-y-4 pt-4 border-t border-white/5">
-            <h3 className="text-sm font-bold uppercase tracking-widest text-neon-blue">Requisitos Obligatorios:</h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold uppercase tracking-widest text-neon-blue">Requisitos Obligatorios:</h3>
+              <div className="flex items-center gap-1 text-[10px] text-neon-red font-black animate-pulse">
+                <Shield className="w-3 h-3" /> VERIFICACIÓN MANUAL
+              </div>
+            </div>
             <ul className="space-y-3">
               <li className="flex items-start gap-3 text-gray-300">
                 <div className="w-6 h-6 rounded-full bg-neon-blue/20 flex items-center justify-center shrink-0 mt-0.5">
@@ -383,14 +424,29 @@ export default function App() {
                   <MessageSquare className="w-3.5 h-3.5 text-green-400" />
                 </div>
                 <div className="flex flex-col">
-                  <span>Seguir el canal de WhatsApp:</span>
+                  <span className="font-bold text-white">Seguir el canal de WhatsApp:</span>
+                  <p className="text-[10px] text-gray-400 mb-2">Haz clic abajo, espera 3 segundos y luego marca la casilla de arriba.</p>
+                  <p className="text-[10px] text-neon-red font-black uppercase mb-2">Se verificará manualmente antes de entregar el premio.</p>
                   <a 
                     href="https://whatsapp.com/channel/0029Vb7lwDNDjiOaZDFLZB2A" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="text-neon-blue hover:underline flex items-center gap-1 mt-1 font-bold"
+                    onClick={() => {
+                      if (!hasClickedLink) {
+                        setIsVerifyingLink(true);
+                        setTimeout(() => {
+                          setHasClickedLink(true);
+                          setIsVerifyingLink(false);
+                        }, 3000);
+                      }
+                    }}
+                    className={`p-3 rounded-lg border-2 text-center transition-all flex items-center justify-center gap-2 font-black uppercase tracking-widest ${
+                      hasClickedLink ? 'border-green-500/50 text-green-400 bg-green-500/5' : 
+                      isVerifyingLink ? 'border-yellow-500/50 text-yellow-400 animate-pulse' :
+                      'border-neon-blue text-neon-blue hover:bg-neon-blue/10 animate-bounce'
+                    }`}
                   >
-                    Abrir Canal <ExternalLink className="w-3 h-3" />
+                    {hasClickedLink ? 'Canal Abierto ✓' : isVerifyingLink ? 'Verificando en 3s...' : 'Abrir Canal de WhatsApp'} <ExternalLink className="w-4 h-4" />
                   </a>
                 </div>
               </li>
@@ -400,7 +456,7 @@ export default function App() {
       )}
 
       {/* Footer Stats */}
-      <div className="flex gap-8 text-gray-500 text-xs font-bold uppercase tracking-widest">
+      <div className="flex flex-wrap justify-center gap-6 md:gap-8 text-gray-500 text-[10px] font-bold uppercase tracking-widest">
         <div className="flex items-center gap-2">
           <Users className="w-4 h-4" />
           <span>{participantes.length} Participantes</span>
@@ -408,6 +464,10 @@ export default function App() {
         <div className="flex items-center gap-2">
           <Shield className="w-4 h-4" />
           <span>Sorteo Verificado</span>
+        </div>
+        <div className="flex items-center gap-2 text-neon-red">
+          <AlertCircle className="w-4 h-4" />
+          <span>Verificación Manual Activa</span>
         </div>
       </div>
 
