@@ -1,0 +1,5 @@
+{
+  "name": "Sorteo Murder Mystery 2",
+  "description": "Una página web para gestionar sorteos de Roblox con registro de usuarios, temporizador y panel de administrador.",
+  "requestFramePermissions": []
+}

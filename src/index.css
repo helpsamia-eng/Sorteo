@@ -1,0 +1,77 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  --color-neon-red: #ff3131;
+  --color-neon-purple: #bc13fe;
+  --color-neon-blue: #00d2ff;
+  
+  --animate-pulse-neon: pulse-neon 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-neon {
+  0%, 100% {
+    opacity: 1;
+    filter: drop-shadow(0 0 5px var(--color-neon-red));
+  }
+  50% {
+    opacity: .8;
+    filter: drop-shadow(0 0 15px var(--color-neon-red));
+  }
+}
+
+body {
+  background-color: #0a0a0a;
+  color: #ffffff;
+  font-family: var(--font-sans);
+}
+
+.gaming-card {
+  background: rgba(20, 20, 20, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+}
+
+.neon-border-red {
+  border: 1px solid var(--color-neon-red);
+  box-shadow: 0 0 10px rgba(255, 49, 49, 0.3);
+}
+
+.neon-text-red {
+  color: var(--color-neon-red);
+  text-shadow: 0 0 10px rgba(255, 49, 49, 0.5);
+}
+
+.neon-button-red {
+  background: var(--color-neon-red);
+  color: white;
+  box-shadow: 0 0 15px rgba(255, 49, 49, 0.5);
+  transition: all 0.3s ease;
+}
+
+.neon-button-red:hover {
+  box-shadow: 0 0 25px rgba(255, 49, 49, 0.8);
+  transform: translateY(-2px);
+}
+
+.neon-button-red:active {
+  transform: translateY(0);
+}
+
+.neon-input {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.neon-input:focus {
+  border-color: var(--color-neon-red);
+  box-shadow: 0 0 10px rgba(255, 49, 49, 0.3);
+  outline: none;
+}

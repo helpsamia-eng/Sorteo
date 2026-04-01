@@ -1,0 +1,52 @@
+{
+  "entities": {
+    "Participante": {
+      "title": "Participante",
+      "description": "Un usuario que se ha inscrito en el sorteo.",
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string",
+          "description": "El nombre de usuario de Roblox."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "La fecha y hora de inscripción."
+        }
+      },
+      "required": ["username", "createdAt"]
+    },
+    "GiveawayConfig": {
+      "title": "Configuración del Sorteo",
+      "description": "Configuración global del sorteo, incluyendo el temporizador y el ganador.",
+      "type": "object",
+      "properties": {
+        "endDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "La fecha y hora en que termina el sorteo."
+        },
+        "winner": {
+          "type": "string",
+          "description": "El nombre de usuario del ganador seleccionado."
+        },
+        "winnerSelectedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "La fecha y hora en que se seleccionó al ganador."
+        }
+      }
+    }
+  },
+  "firestore": {
+    "/participantes/{participanteId}": {
+      "schema": "Participante",
+      "description": "Colección de participantes del sorteo."
+    },
+    "/config/giveaway": {
+      "schema": "GiveawayConfig",
+      "description": "Documento único de configuración del sorteo."
+    }
+  }
+}

@@ -1,0 +1,78 @@
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: participantes
+// Document ID: auto-generated
+// Fields:
+//   - username: string (required, 3-20 chars) - Roblox username
+//   - createdAt: timestamp (required) - Registration date
+//
+// Collection: config
+// Document ID: giveaway
+// Fields:
+//   - endDate: timestamp (optional) - Giveaway end date
+//   - winner: string (optional) - Selected winner username
+//   - winnerSelectedAt: timestamp (optional) - When the winner was picked
+//
+// ===============================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "helpsamia@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function isValidParticipante(data) {
+      return data.keys().hasAll(['username', 'createdAt']) &&
+             data.username is string && data.username.size() >= 3 && data.username.size() <= 20 &&
+             data.createdAt is timestamp;
+    }
+
+    function isRecent(time) {
+      return time > request.time - duration.value(5, 'm') &&
+             time < request.time + duration.value(5, 'm');
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /participantes/{participanteId} {
+      // Allow anyone to register, but only if the data is valid and recent
+      // To prevent duplicates, we'll handle that in the app logic or by using username as ID
+      // But for simplicity with auto-generated IDs, we'll allow create if valid.
+      allow create: if isValidParticipante(request.resource.data) && isRecent(request.resource.data.createdAt);
+      
+      // Everyone can read the participants to see the count
+      allow read: if true;
+
+      // Only admin can update or delete
+      allow update, delete: if isAdmin();
+    }
+
+    match /config/giveaway {
+      // Everyone can read the configuration (timer, winner)
+      allow read: if true;
+      
+      // Only admin can update the configuration
+      allow write: if isAdmin();
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
