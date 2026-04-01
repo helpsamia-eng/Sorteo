@@ -269,7 +269,12 @@ export default function App() {
           SORTEO MURDER MYSTERY 2 🔪
         </motion.h1>
         
-        <p className="text-gray-400 font-medium">¡Participa y gana objetos exclusivos!</p>
+        <div className="space-y-2">
+          <p className="text-gray-400 font-medium">¡Participa y gana el cuchillo <span className="text-neon-blue font-black uppercase tracking-widest">"DJ"</span>!</p>
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 text-[10px] font-black uppercase tracking-widest animate-pulse">
+            <Shield className="w-3 h-3" /> AVISO: NUNCA PEDIMOS TU CONTRASEÑA
+          </div>
+        </div>
       </header>
 
       {/* Countdown Timer */}
